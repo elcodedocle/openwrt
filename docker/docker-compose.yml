@@ -1,0 +1,7 @@
+services:
+  openwrt-builder:
+    image: openwrt-builder
+    build:
+      dockerfile: ./openwrt-builder.Dockerfile
+    volumes:
+      - ../:/home/openwrt/openwrt
