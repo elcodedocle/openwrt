@@ -1,7 +1,17 @@
 services:
   openwrt-builder:
-    image: openwrt-builder
+    tty: true
+    stdin_open: true
     build:
-      dockerfile: ./openwrt-builder.Dockerfile
+      dockerfile: ./docker/openwrt-builder.Dockerfile
+      context: ../
     volumes:
       - ../:/home/openwrt/openwrt
+      # MacOS: Replace line above with uncommented below
+      # to build in an unmapped volume
+      # and avoid bind mapped volume mount errors on capitalisation & ownership
+      # - openwrt-builder-data:/home/openwrt/openwrt
+
+# MacOS: Uncomment below to define the unmapped volume
+# volumes:
+#   - openwrt-builder-data:
