@@ -4,13 +4,22 @@ if [ -z "$TERM" ]; then
   echo "docker run -it openwrt-builder"
   echo "or"
   echo "docker compose run --rm openwrt-builder"
+  exit 1
 fi
-pushd /home/openwrt/openwrt || exit
+pushd /home/openwrt/openwrt || exit 1
 if [ "$FORCE_FEEDS_REFRESH" = "true" ] || [ ! -d feeds ]; then
   echo "Updating feeds..."
-  ./scripts/feeds update -a
+  if ! ./scripts/feeds update -a; then
+    echo "Error updating feeds!"
+    popd || exit 1
+    exit 1
+  fi
   echo "Installing feeds..."
-  ./scripts/feeds install -a
+  if ! ./scripts/feeds install -a; then
+    echo "Error installing feeds!"
+    popd || exit 1
+    exit 1
+  fi
   echo "Feeds updated and installed."
 fi
 
@@ -20,18 +29,34 @@ fi
 # cp diffconfig docker/build-configs/<manufacturer>/<series>/<model>/<profile>.buildinfo
 
 if [ -n "$BUILD_CONFIG_FILE_PATH" ]; then
+  if [ ! -f "docker/build-configs/$BUILD_CONFIG_FILE_PATH" ]; then
+      echo "Cannot find $BUILD_CONFIG_FILE_PATH config file in from docker/build-configs/"
+      echo "Aborting..."
+      popd || exit 1
+      exit 1
+  fi
   echo "Copying config from docker/build-configs/$BUILD_CONFIG_FILE_PATH ..."
   cp "docker/build-configs/$BUILD_CONFIG_FILE_PATH" .config
 elif [ -n "$BUILD_CONFIG_FILE_URL" ]; then
   echo "No BUILD_CONFIG_FILE_PATH provided. Downloading config from $BUILD_CONFIG_FILE_URL ..."
-  wget "$BUILD_CONFIG_FILE_URL" -O .config
+  if ! wget "$BUILD_CONFIG_FILE_URL" -O .config; then
+      echo "Cannot retrieve config file from $BUILD_CONFIG_FILE_URL"
+      echo "Aborting..."
+      popd || exit 1
+      exit 1
+  fi
 else
   echo "No BUILD_CONFIG_FILE_PATH or BUILD_CONFIG_FILE_URL provided; Base .config file will not be overridden with either of them."
 fi
 
 if [ "$MENUCONFIG" = "true" ]; then
   echo "Generating config file..."
-  make menuconfig
+  if ! make menuconfig; then
+    echo "Error generating config file."
+    echo "Aborting..."
+    popd || exit 1
+    exit 1
+  fi
   echo "Generated config file:"
   cat .config
 fi
@@ -53,4 +78,4 @@ else
   echo "No BUILD_TARGETS provided. Exiting..."
 fi
 
-popd || exit
+popd || exit 1

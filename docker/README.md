@@ -40,7 +40,7 @@ Asus RT-AX52 custom config from the default 24.10.4 config for mediatek filogic 
 # Make sure you are on the docker folder and the 24.10.4 branch/tag is checked out
 docker compose run -e MENUCONFIG=true -e BUILD_CONFIG_FILE_URL=https://downloads.openwrt.org/releases/24.10.4/targets/mediatek/filogic/config.buildinfo openwrt-builder
 # 1. Select RT-AX52 as build profile
-# 2. Unselect dadhi telephony VoIP stuff (Or manually apply https://github.com/asterisk/dahdi-linux/commit/b821026c73588e927ae882f904642c2103781395
+# 2. Unselect dahdi telephony VoIP stuff (Or manually apply https://github.com/asterisk/dahdi-linux/commit/b821026c73588e927ae882f904642c2103781395
 # to the sources downloaded to build_dir/target-aarch64_cortex-a53_musl/linux-mediatek_filogic/dahdi-linux-2024.04.12~83d89b64/drivers/dahdi during build)
 # 3. Apply any other desired customisation, save, and exit
 ```
